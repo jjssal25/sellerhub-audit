@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sellerhub Project Audit</title>
+<style>
+  :root {
+    --bg: #f4efe7;
+    --surface: #fffdf8;
+    --surface-strong: #fff;
+    --text: #1f2430;
+    --muted: #5b6475;
+    --line: #ddd4c6;
+    --accent: #0f6d62;
+    --accent-soft: #dff3ee;
+    --critical: #a11d33;
+    --critical-soft: #f8d7dd;
+    --high: #b85c00;
+    --high-soft: #fde7d1;
+    --medium: #835f00;
+    --medium-soft: #f7efc9;
+    --low: #3f5f8c;
+    --low-soft: #dbe9fb;
+    --shadow: 0 18px 40px rgba(45, 41, 35, 0.08);
+    --radius: 18px;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(15, 109, 98, 0.12), transparent 28%),
+      radial-gradient(circle at top right, rgba(184, 92, 0, 0.10), transparent 24%),
+      linear-gradient(180deg, #f9f5ee 0%, var(--bg) 100%);
+    line-height: 1.6;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .wrap {
+    width: min(1180px, calc(100vw - 32px));
+    margin: 0 auto;
+    padding: 28px 0 64px;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, rgba(15, 109, 98, 0.94), rgba(9, 47, 67, 0.95));
+    color: #f9fffd;
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: auto -80px -80px auto;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1.35fr 0.9fr;
+    gap: 24px;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+
+  h1, h2, h3 {
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  h1 {
+    margin-top: 14px;
+    font-size: clamp(2rem, 4vw, 3rem);
+  }
+
+  .hero p {
+    margin: 16px 0 0;
+    color: rgba(249, 255, 253, 0.86);
+    max-width: 52rem;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-content: start;
+  }
+
+  .hero-card,
+  .panel,
+  .issue,
+  .mini,
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: var(--shadow);
+  }
+
+  .hero-card {
+    color: #16332f;
+    border-radius: 18px;
+    padding: 16px;
+    background: rgba(255, 252, 246, 0.96);
+  }
+
+  .hero-card strong {
+    display: block;
+    font-size: 1.55rem;
+  }
+
+  .hero-card span {
+    font-size: 13px;
+    color: #4c5c5a;
+  }
+
+  .toc {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .toc a {
+    text-decoration: none;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    color: #f4fffd;
+    font-size: 14px;
+  }
+
+  .section {
+    margin-top: 24px;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  .section-head p {
+    margin: 0;
+    color: var(--muted);
+    max-width: 44rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .panel {
+    border-radius: var(--radius);
+    padding: 22px;
+    border-color: var(--line);
+  }
+
+  .panel ul,
+  .issue ul {
+    margin: 12px 0 0;
+    padding-left: 18px;
+  }
+
+  .panel li,
+  .issue li {
+    margin: 6px 0;
+  }
+
+  .summary {
+    grid-column: span 7;
+  }
+
+  .scope {
+    grid-column: span 5;
+  }
+
+  .scoreboard {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .mini {
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid var(--line);
+  }
+
+  .mini strong {
+    display: block;
+    font-size: 1.6rem;
+  }
+
+  .mini span {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .mini.critical {
+    background: var(--critical-soft);
+  }
+
+  .mini.high {
+    background: var(--high-soft);
+  }
+
+  .mini.medium {
+    background: var(--medium-soft);
+  }
+
+  .mini.low {
+    background: var(--low-soft);
+  }
+
+  .issues {
+    display: grid;
+    gap: 16px;
+  }
+
+  .issue {
+    border-radius: 20px;
+    padding: 22px;
+    border: 1px solid var(--line);
+  }
+
+  .issue-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: start;
+    margin-bottom: 10px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 76px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #fff;
+  }
+
+  .badge.critical {
+    background: var(--critical);
+  }
+
+  .badge.high {
+    background: var(--high);
+  }
+
+  .badge.medium {
+    background: var(--medium);
+  }
+
+  .badge.low {
+    background: var(--low);
+  }
+
+  .meta {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: #f1ece2;
+    color: #4e5563;
+    font-size: 12px;
+  }
+
+  code, pre {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+
+  pre {
+    margin: 14px 0 0;
+    padding: 14px;
+    border-radius: 14px;
+    background: #151a21;
+    color: #eef3fb;
+    overflow: auto;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .table-wrap {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface-strong);
+  }
+
+  th, td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #ece3d5;
+    vertical-align: top;
+  }
+
+  th {
+    background: #f6efe3;
+    font-size: 13px;
+    color: #4d5764;
+  }
+
+  td {
+    font-size: 14px;
+  }
+
+  .footnote {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .footer {
+    margin-top: 28px;
+    padding: 20px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  @media (max-width: 960px) {
+    .hero-inner,
+    .scoreboard {
+      grid-template-columns: 1fr;
+    }
+
+    .summary,
+    .scope {
+      grid-column: span 12;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .wrap {
+      width: min(100vw - 20px, 1180px);
+      padding-top: 16px;
+    }
+
+    .hero-inner,
+    .panel,
+    .issue {
+      padding: 18px;
+    }
+
+    .section-head {
+      display: block;
+    }
+
+    th,
+    td {
+      padding: 12px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-inner">
+        <div>
+          <div class="eyebrow">Sellerhub Audit · 2026-05-15 · Local Static Report</div>
+          <h1>Sellerhub 구조 및 개발 코드 감사 보고서</h1>
+          <p>
+            현재 저장소는 대형 PHP 모놀리식 코드베이스이며, 공통 부트스트랩 과결합, 디렉터리 경계 붕괴,
+            실운영 의존 테스트, 민감정보 노출 흔적, 레거시 문법 혼재가 동시에 존재합니다.
+            이번 보고서는 실제 파일 탐색 결과를 기반으로, 유지보수성과 안정성을 가장 크게 훼손하는 지점을 우선순위 중심으로 정리합니다.
+          </p>
+          <nav class="toc" aria-label="목차">
+            <a href="#overview">개요</a>
+            <a href="#signals">핵심 신호</a>
+            <a href="#findings">상세 이슈</a>
+            <a href="#evidence">근거</a>
+            <a href="#actions">우선순위</a>
+          </nav>
+        </div>
+        <div class="hero-grid">
+          <div class="hero-card">
+            <strong>5,419</strong>
+            <span>벤더 제외 PHP 파일 수</span>
+          </div>
+          <div class="hero-card">
+            <strong>128,473</strong>
+            <span>벤더 제외 PHP 총 라인 수</span>
+          </div>
+          <div class="hero-card">
+            <strong>125</strong>
+            <span>테스트 파일 수</span>
+          </div>
+          <div class="hero-card">
+            <strong>15,228</strong>
+            <span>short open tag 사용 건수</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="overview">
+      <div class="section-head">
+        <div>
+          <h2>프로젝트 개요</h2>
+          <p>탐색 기준은 저장소 내부 파일 구조, 대표 엔트리포인트, 공통 부트스트랩, 테스트 구성, 위험 신호 패턴 검색 결과입니다.</p>
+        </div>
+      </div>
+      <div class="grid">
+        <article class="panel summary">
+          <h3>요약 판단</h3>
+          <ul>
+            <li>핵심 리스크는 개별 버그보다도 <strong>시스템 경계가 없는 구조</strong>에 있습니다.</li>
+            <li><code>shop/lib/library.php</code> 하나에 HTTP 헤더, 인코딩, dotenv, 세션, Redis, DB, Eloquent, 디버그 설정이 집중되어 있습니다.</li>
+            <li><code>shop/</code>, <code>m/</code>, <code>m2/</code>, <code>whub/</code>가 독립 서비스처럼 보이지만 실제로는 공통 전역 상태를 공유합니다.</li>
+            <li>테스트는 존재하지만 상당수가 실DB, 실데이터, 외부 웹훅에 의존해 회귀 안전망으로 보기 어렵습니다.</li>
+            <li>레거시 PHP 문법, EUC-KR 헤더, short tag, 직접 <code>include</code>, 셸 실행이 광범위하게 남아 있어 현대화 비용이 누적되고 있습니다.</li>
+          </ul>
+        </article>
+        <aside class="panel scope">
+          <h3>조사 범위</h3>
+          <ul>
+            <li>대표 진입점: <code>whub/header.php</code>, <code>m2/_header.php</code>, <code>shop/admin_provider/lib.php</code></li>
+            <li>공통 부트스트랩: <code>shop/lib/library.php</code></li>
+            <li>테스트 구성: <code>phpunit.xml</code>, <code>tests/bootstrap.php</code>, <code>tests/</code> 전반</li>
+            <li>위험 신호 패턴: <code>exec</code>, 하드코딩된 웹훅, short tag, 직접 <code>session_start</code>, 인코딩 헤더</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="signals">
+      <div class="section-head">
+        <div>
+          <h2>핵심 신호</h2>
+          <p>리포지토리 전체 상태를 빠르게 설명하는 고위험 신호들입니다.</p>
+        </div>
+      </div>
+      <div class="scoreboard">
+        <div class="mini critical">
+          <strong>2</strong>
+          <span>Critical findings</span>
+        </div>
+        <div class="mini high">
+          <strong>3</strong>
+          <span>High findings</span>
+        </div>
+        <div class="mini medium">
+          <strong>1</strong>
+          <span>Medium findings</span>
+        </div>
+        <div class="mini low">
+          <strong>1</strong>
+          <span>Low findings</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="findings">
+      <div class="section-head">
+        <div>
+          <h2>상세 이슈</h2>
+          <p>각 이슈는 심각도, 영향, 근거, 개선 방향을 함께 기록했습니다. 단순 취향 문제가 아니라 구조적 비용을 만드는 항목만 포함했습니다.</p>
+        </div>
+      </div>
+      <div class="issues">
+        <article class="issue">
+          <div class="issue-head">
+            <div>
+              <h3>공통 부트스트랩에 런타임 책임이 과도하게 집중됨</h3>
+              <p><code>shop/lib/library.php</code>가 전역 애플리케이션 컨테이너처럼 동작하면서, HTTP 응답 제어와 인프라 초기화, 세션, ORM 로딩이 한 파일에 결합되어 있습니다.</p>
+            </div>
+            <span class="badge critical">CRITICAL</span>
+          </div>
+          <div class="meta">
+            <span class="chip">영향: 변경 파급도 높음</span>
+            <span class="chip">범주: 구조</span>
+            <span class="chip">대표 파일: <code>shop/lib/library.php</code></span>
+          </div>
+          <ul>
+            <li>웹 요청 헤더 출력, 인코딩 고정, dotenv 로딩, 세션 쿠키 정책, Redis 세션 핸들러, DB, Eloquent, 디버그바 설정이 모두 여기서 수행됩니다.</li>
+            <li>이 구조에서는 특정 하위 기능만 테스트하거나 CLI/배치/웹 환경을 분리하기 어렵습니다.</li>
+            <li>부트스트랩 수정이 인증, 페이지 렌더링, 배치, 테스트 전체에 동시에 영향을 줍니다.</li>
+          </ul>
+          <pre><code>shop/lib/library.php
+header("Content-Type: text/html; charset=EUC-KR");
+$dotenv = Dotenv::createImmutable($_SERVER['DOCUMENT_ROOT']);
+session_start();
+require_once $_SERVER['DOCUMENT_ROOT'] . '/shop/lib/eloquent.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . "/shop/lib/sh/sh.class.php";</code></pre>
+          <p class="footnote">권장 방향: HTTP/CLI 공통 초기화, 세션 초기화, 데이터 계층 부트스트랩을 분리하고 엔트리포인트별 최소 부트스트랩으로 축소해야 합니다.</p>
+        </article>
+
+        <article class="issue">
+          <div class="issue-head">
+            <div>
+              <h3>민감정보와 외부 웹훅이 코드 및 테스트에 직접 박혀 있음</h3>
+              <p>실서비스용 추정 Slack/Synology 웹훅, 외부 API 키, 시크릿이 코드와 테스트에 노출되어 있습니다.</p>
+            </div>
+            <span class="badge critical">CRITICAL</span>
+          </div>
+          <div class="meta">
+            <span class="chip">영향: 보안 사고 가능성</span>
+            <span class="chip">범주: 보안/운영</span>
+            <span class="chip">대표 파일: <code>tests/SynologyTest.php</code>, <code>shop/lib/sh/ProviderMgr.php</code></span>
+          </div>
+          <ul>
+            <li>테스트 파일 안에 외부 웹훅 URL이 존재하며, 실제로 요청을 보내는 코드가 있습니다.</li>
+            <li>운영 코드 곳곳에도 Slack/Synology 훅 URL과 키 관련 필드가 직접 나타납니다.</li>
+            <li>이 패턴은 저장소 유출, 로그 노출, 개발자 로컬 실행만으로도 외부 시스템에 영향이 갈 수 있음을 의미합니다.</li>
+          </ul>
+          <pre><code>tests/SynologyTest.php
+$hook_url = "https://gw.lately.co.kr:15001/...token=...";
+$test_url = "https://hooks.slack.com/services/...";</code></pre>
+          <p class="footnote">권장 방향: 코드 내 시크릿 제거, 환경변수 또는 시크릿 매니저로 이동, 테스트에서 외부 호출 전면 차단이 필요합니다.</p>
+        </article>
+
+        <article class="issue">
+          <div class="issue-head">
+            <div>
+              <h3>테스트가 격리되지 않아 회귀 안전망 역할을 못 함</h3>
+              <p><code>phpunit.xml</code>은 존재하지만 <code>tests/bootstrap.php</code>가 실제 애플리케이션 부트스트랩을 그대로 올리고, 테스트 코드도 실DB/실데이터/외부 시스템을 직접 사용합니다.</p>
+            </div>
+            <span class="badge high">HIGH</span>
+          </div>
+          <div class="meta">
+            <span class="chip">영향: 신뢰할 수 없는 테스트</span>
+            <span class="chip">범주: 테스트</span>
+            <span class="chip">대표 파일: <code>tests/bootstrap.php</code>, <code>tests/AutoRefundExecTest.php</code></span>
+          </div>
+          <ul>
+            <li>테스트 부트스트랩이 <code>shop/lib/library.php</code>를 로드해 세션과 전역 상태에 묶입니다.</li>
+            <li>여러 테스트가 <code>Model::first()</code>, <code>->save()</code>, <code>::create()</code> 등을 직접 호출합니다.</li>
+            <li>실행 환경에 따라 테스트 결과가 달라질 가능성이 높고, CI 자동화가 어렵습니다.</li>
+          </ul>
+          <pre><code>tests/bootstrap.php
+$_SERVER['DOCUMENT_ROOT'] = __DIR__."/..";
+include($_SERVER['DOCUMENT_ROOT']."/shop/lib/library.php");</code></pre>
+          <p class="footnote">권장 방향: 테스트 전용 부트스트랩, 격리 DB, 외부 IO mocking, 읽기 전용 진단 테스트와 상태 변경 테스트의 분리가 필요합니다.</p>
+        </article>
+
+        <article class="issue">
+          <div class="issue-head">
+            <div>
+              <h3>서비스 경계 없이 디렉터리와 화면 흐름이 중첩됨</h3>
+              <p><code>shop</code>, <code>m</code>, <code>m2</code>, <code>whub</code>가 서로 다른 애플리케이션처럼 보이지만 같은 전역 상태와 공통 라이브러리를 혼용합니다.</p>
+            </div>
+            <span class="badge high">HIGH</span>
+          </div>
+          <div class="meta">
+            <span class="chip">영향: 변경 비용 확대</span>
+            <span class="chip">범주: 구조</span>
+            <span class="chip">대표 파일: <code>whub/header.php</code>, <code>m2/_header.php</code></span>
+          </div>
+          <ul>
+            <li><code>whub/header.php</code>는 직접 공통 부트스트랩과 모델, 캐시 객체를 묶어서 뷰 레벨에서 초기화합니다.</li>
+            <li><code>m2/_header.php</code>는 모바일 화면 렌더링과 쿠키, 템플릿, 장바구니 로직을 동시에 수행합니다.</li>
+            <li>파일 위치만으로 책임을 추론하기 어렵고, 신규 개발자가 안전한 수정 범위를 판단하기 어렵습니다.</li>
+          </ul>
+          <p class="footnote">권장 방향: 엔트리포인트를 채널별로 분리하고, 공통 도메인 서비스는 명확한 API 계층 뒤로 숨겨야 합니다.</p>
+        </article>
+
+        <article class="issue">
+          <div class="issue-head">
+            <div>
+              <h3>레거시 PHP 문법과 인코딩 혼재가 현대화와 호환성을 방해함</h3>
+              <p>short open tag, EUC-KR 기반 헤더, 오래된 전역 배열 사용이 넓게 퍼져 있습니다.</p>
+            </div>
+            <span class="badge high">HIGH</span>
+          </div>
+          <div class="meta">
+            <span class="chip">영향: 업그레이드 난이도 증가</span>
+            <span class="chip">범주: 호환성</span>
+            <span class="chip">대표 신호: short tag 15,228건</span>
+          </div>
+          <ul>
+            <li>PHP 설정에 short_open_tag 의존성이 생기며, 환경 이동 시 즉시 깨질 수 있습니다.</li>
+            <li>UTF-8 기준 도구 체인과 충돌해 한글 깨짐, 검색 정확도 저하, 정적 분석 품질 저하가 생깁니다.</li>
+            <li>현대 PHP 문법과 정적 분석 도구 도입 난이도를 끌어올립니다.</li>
+          </ul>
+          <pre><code>shop/lib/library.php
+header("Content-Type: text/html; charset=EUC-KR");
+
+m/lib/library.php
+&lt;?</code></pre>
+          <p class="footnote">권장 방향: 신규 코드 UTF-8 강제, short tag 제거, 채널 단위 인코딩 전환 계획 수립이 필요합니다.</p>
+        </article>
+
+        <article class="issue">
+          <div class="issue-head">
+            <div>
+              <h3>셸 실행과 권한 변경이 애플리케이션 코드에 직접 존재함</h3>
+              <p>파일 업로드나 PG 연동 코드에서 <code>exec</code>, <code>shell_exec</code> 호출이 보이며 일부는 권한을 직접 변경합니다.</p>
+            </div>
+            <span class="badge medium">MEDIUM</span>
+          </div>
+          <div class="meta">
+            <span class="chip">영향: 운영 안정성/보안 저하</span>
+            <span class="chip">범주: 운영</span>
+            <span class="chip">대표 파일: <code>m/admin_provider/goods/indb.saveImage.php</code></span>
+          </div>
+          <ul>
+            <li><code>mkdir -p</code>, <code>chmod -R 777</code>를 애플리케이션 코드에서 직접 실행합니다.</li>
+            <li>일부 결제/배치 관련 코드도 외부 바이너리 실행에 의존합니다.</li>
+            <li>입력 검증과 운영 환경 통제가 느슨하면 취약점으로 이어질 수 있습니다.</li>
+          </ul>
+          <pre><code>m/admin_provider/goods/indb.saveImage.php
+exec("mkdir -p $savePath");
+exec("chmod -R 777 $savePath");</code></pre>
+          <p class="footnote">권장 방향: 파일 시스템 작업은 검증된 래퍼로 통합하고, 실행 권한과 디렉터리 권한 정책을 인프라 레벨로 이동해야 합니다.</p>
+        </article>
+
+        <article class="issue">
+          <div class="issue-head">
+            <div>
+              <h3>프레젠테이션 계층에서 데이터 조회와 상태 의존이 과도함</h3>
+              <p>헤더/화면 파일이 캐시 조회, 모델 접근, 세션 조건 분기, URL 계산을 모두 수행합니다.</p>
+            </div>
+            <span class="badge low">LOW</span>
+          </div>
+          <div class="meta">
+            <span class="chip">영향: 뷰 유지보수성 저하</span>
+            <span class="chip">범주: 코드 품질</span>
+            <span class="chip">대표 파일: <code>whub/header.php</code></span>
+          </div>
+          <ul>
+            <li>템플릿 계층이 도메인 조회를 직접 수행해 재사용성과 테스트성이 떨어집니다.</li>
+            <li>작은 UI 수정도 데이터 흐름 이해를 요구해 생산성을 떨어뜨립니다.</li>
+          </ul>
+          <p class="footnote">권장 방향: 화면용 DTO 또는 presenter 계층으로 데이터 준비를 분리하는 것이 안전합니다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="evidence">
+      <div class="section-head">
+        <div>
+          <h2>대표 근거 파일과 패턴</h2>
+          <p>문서에 반영한 판단을 뒷받침하는 대표 예시들입니다. 민감한 값은 그대로 재노출하지 않았습니다.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>근거</th>
+              <th>관찰 내용</th>
+              <th>시사점</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>shop/lib/library.php</code></td>
+              <td>헤더 출력, dotenv, 세션, Redis, DB, Eloquent, 디버그바를 단일 파일에서 초기화</td>
+              <td>애플리케이션 경계가 없고 테스트/런타임 분리가 어렵다</td>
+            </tr>
+            <tr>
+              <td><code>tests/bootstrap.php</code></td>
+              <td>테스트가 실제 서비스 부트스트랩을 그대로 include</td>
+              <td>격리된 테스트 환경이 아니다</td>
+            </tr>
+            <tr>
+              <td><code>tests/SynologyTest.php</code></td>
+              <td>외부 웹훅 URL을 직접 사용해 요청 전송</td>
+              <td>테스트만으로도 외부 시스템에 영향 가능</td>
+            </tr>
+            <tr>
+              <td><code>whub/header.php</code></td>
+              <td>헤더 렌더링 파일에서 캐시, 모델, 카테고리, 세션 기반 분기 수행</td>
+              <td>뷰와 도메인 로직이 뒤섞여 있다</td>
+            </tr>
+            <tr>
+              <td><code>m2/_header.php</code></td>
+              <td>모바일 렌더링 파일에서 쿠키, 템플릿, 카트 초기화, 환경 리다이렉트 처리</td>
+              <td>엔트리포인트 책임이 비대하다</td>
+            </tr>
+            <tr>
+              <td><code>m/admin_provider/goods/indb.saveImage.php</code></td>
+              <td><code>exec</code>로 디렉터리 생성 및 <code>chmod 777</code> 수행</td>
+              <td>운영 안전성과 보안 정책이 코드에 하드코딩됨</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="actions">
+      <div class="section-head">
+        <div>
+          <h2>즉시 착수 우선순위</h2>
+          <p>전면 재작성보다, 폭발 반경이 큰 항목부터 줄이는 순서가 현실적입니다.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>우선순위</th>
+              <th>권장 작업</th>
+              <th>목표</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>코드와 테스트에 박힌 웹훅/시크릿 제거, 환경변수로 이동, 유출 가능 값 회전</td>
+              <td>즉시 보안 리스크 차단</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>테스트 전용 부트스트랩 분리 및 외부 IO 차단</td>
+              <td>신뢰 가능한 자동 검증 기반 확보</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><code>shop/lib/library.php</code> 책임을 세션/환경/DB 초기화로 분해</td>
+              <td>부트스트랩 변경 파급도 축소</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><code>whub</code>, <code>m2</code> 등 채널별 엔트리포인트의 데이터 준비 로직 외부 이동</td>
+              <td>화면 계층 단순화</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>short tag 제거와 UTF-8 전환 계획 수립</td>
+              <td>현대화 기반 마련</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="footnote">
+        참고: 이번 보고서는 개선 구현이 아니라 진단 문서 작성이 목적입니다. 수치와 예시는 현재 저장소 탐색 결과 기준이며, 일부 위험 신호는 추가 샘플링 시 더 늘어날 수 있습니다.
+      </p>
+    </section>
+
+    <div class="footer">
+      Generated for local review in <code>develop/reports/project-audit.html</code>.
+    </div>
+  </div>
+</body>
+</html>
